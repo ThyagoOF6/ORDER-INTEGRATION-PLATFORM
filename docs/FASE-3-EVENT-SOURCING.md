@@ -67,38 +67,38 @@ stubs criados na Fase 2.5 por listeners funcionais (`@KafkaListener`).
 
 ### 1. Event Store Infrastructure
 
-| Arquivo | Descrição |
-|---|---|
-| `V2__create_event_store_table.sql` | Migration Flyway: cria tabela `domain_events` com 7 índices (event_id, aggregate_id, aggregate_type, event_type, created_at, is_published, correlation_id) |
-| `DomainEventJpaEntity.java` | Entidade JPA (sem Lombok, seguindo convenção do projeto) com builder manual |
-| `DomainEventDto.java` | DTO usado pela camada de aplicação (Hexagonal: application não depende de JPA) |
-| `DomainEventRepositoryPort.java` | Porta hexagonal com 13 operações (persistir, buscar por ID/aggregate/tipo/correlação, marcar como publicado, contar, deletar) |
-| `DomainEventSpringDataRepository.java` | Repositório Spring Data JPA com queries customizadas (`@Query`) |
-| `DomainEventJpaRepositoryAdapter.java` | Implementação do port, mapeia DTO ↔ Entity |
+| Arquivo                                | Descrição                                                                                                                                                  |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `V2__create_event_store_table.sql`     | Migration Flyway: cria tabela `domain_events` com 7 índices (event_id, aggregate_id, aggregate_type, event_type, created_at, is_published, correlation_id) |
+| `DomainEventJpaEntity.java`            | Entidade JPA (sem Lombok, seguindo convenção do projeto) com builder manual                                                                                |
+| `DomainEventDto.java`                  | DTO usado pela camada de aplicação (Hexagonal: application não depende de JPA)                                                                             |
+| `DomainEventRepositoryPort.java`       | Porta hexagonal com 13 operações (persistir, buscar por ID/aggregate/tipo/correlação, marcar como publicado, contar, deletar)                              |
+| `DomainEventSpringDataRepository.java` | Repositório Spring Data JPA com queries customizadas (`@Query`)                                                                                            |
+| `DomainEventJpaRepositoryAdapter.java` | Implementação do port, mapeia DTO ↔ Entity                                                                                                                 |
 
 ### 2. Domain Event Publishing
 
-| Arquivo | Mudança |
-|---|---|
-| `DomainEvent.java` | Adicionados métodos abstratos `getAggregateId()` e `toPayload()` |
-| `PedidoCriadoEvent.java` | Implementa `toPayload()` (codigoCliente, pedidoId) |
-| `PedidoSincronizadoEvent.java` | Implementa `toPayload()` (transacaoSapId, statusSap) |
-| `PedidoErroSincronizacaoEvent.java` | Implementa `toPayload()` (codigoErro, mensagemErro, tentativa) |
-| `Pedido.java` | `confirmarSincronizacao()` e `registrarErro()` agora emitem eventos (antes só `criar()` emitia) |
-| `EventPublisherService.java` (novo) | Extrai eventos pendentes do agregado, persiste no Event Store, limpa a lista |
-| `PedidoService.java` | Injeta `EventPublisherService`, chama `publicarEventos()` após cada operação que muda estado |
-| `IdocResponseService.java` | Idem, para os fluxos de confirmação/erro de iDoc |
+| Arquivo                             | Mudança                                                                                         |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `DomainEvent.java`                  | Adicionados métodos abstratos `getAggregateId()` e `toPayload()`                                |
+| `PedidoCriadoEvent.java`            | Implementa `toPayload()` (codigoCliente, pedidoId)                                              |
+| `PedidoSincronizadoEvent.java`      | Implementa `toPayload()` (transacaoSapId, statusSap)                                            |
+| `PedidoErroSincronizacaoEvent.java` | Implementa `toPayload()` (codigoErro, mensagemErro, tentativa)                                  |
+| `Pedido.java`                       | `confirmarSincronizacao()` e `registrarErro()` agora emitem eventos (antes só `criar()` emitia) |
+| `EventPublisherService.java` (novo) | Extrai eventos pendentes do agregado, persiste no Event Store, limpa a lista                    |
+| `PedidoService.java`                | Injeta `EventPublisherService`, chama `publicarEventos()` após cada operação que muda estado    |
+| `IdocResponseService.java`          | Idem, para os fluxos de confirmação/erro de iDoc                                                |
 
 ### 3. Message Broker (Kafka)
 
-| Arquivo | Mudança |
-|---|---|
-| `docker-compose.yml` | Adicionado Zookeeper + Kafka + Kafka UI (porta 8090) |
-| `adapter/out/messaging/build.gradle` | Dependência `spring-kafka` (+ `spring-kafka-test` para testes) e `jackson-databind` |
-| `bootstrap/build.gradle` | Dependências Kafka no módulo executável |
-| `application.yml` | Configuração `spring.kafka.*` (bootstrap-servers, producer, consumer, listener) e `messaging.topics.*` |
-| `IdocResponseListener.java` | Agora possui `@KafkaListener(topics = "${messaging.topics.idoc-response-success}")`, desserializa JSON via Jackson |
-| `ErrorQueueListener.java` | Idem, tópico `sap-idoc-error` |
+| Arquivo                              | Mudança                                                                                                            |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `docker-compose.yml`                 | Adicionado Zookeeper + Kafka + Kafka UI (porta 8090)                                                               |
+| `adapter/out/messaging/build.gradle` | Dependência `spring-kafka` (+ `spring-kafka-test` para testes) e `jackson-databind`                                |
+| `bootstrap/build.gradle`             | Dependências Kafka no módulo executável                                                                            |
+| `application.yml`                    | Configuração `spring.kafka.*` (bootstrap-servers, producer, consumer, listener) e `messaging.topics.*`             |
+| `IdocResponseListener.java`          | Agora possui `@KafkaListener(topics = "${messaging.topics.idoc-response-success}")`, desserializa JSON via Jackson |
+| `ErrorQueueListener.java`            | Idem, tópico `sap-idoc-error`                                                                                      |
 
 ### 4. Testes (11 novos)
 
