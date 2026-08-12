@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation project(':core:domain')
+    implementation project(':core:application')
+    implementation project(':adapter:in:rest')
+    implementation project(':adapter:out:persistence')
+    implementation project(':adapter:out:messaging')
+    implementation project(':infrastructure:config')
+    implementation project(':infrastructure:observability')
+    
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
+springBoot {
+    mainClass = 'com.orderintegration.bootstrap.OrderIntegrationApplication'
+}
+
+bootJar {
+    archiveFileName = 'order-integration-platform.jar'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

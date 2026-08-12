@@ -1,0 +1,11 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    // Domain layer has no external dependencies by design (clean architecture)
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

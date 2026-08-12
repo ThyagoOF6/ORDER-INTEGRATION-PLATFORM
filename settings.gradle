@@ -1,0 +1,10 @@
+rootProject.name = 'order-integration-platform'
+
+include ':core:domain'
+include ':core:application'
+include ':adapter:in:rest'
+include ':adapter:out:persistence'
+include ':adapter:out:messaging'
+include ':infrastructure:config'
+include ':infrastructure:observability'
+include ':bootstrap'
