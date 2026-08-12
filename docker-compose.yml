@@ -5,9 +5,9 @@ services:
     image: postgres:16-alpine
     container_name: order-platform-postgres
     environment:
-      POSTGRES_DB: order_integration_db
-      POSTGRES_USER: order_user
-      POSTGRES_PASSWORD: order_password
+      POSTGRES_DB: ${POSTGRES_DB:-order_integration_db}
+      POSTGRES_USER: ${POSTGRES_USER:-order_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-order_password}
     ports:
       - "5432:5432"
     volumes:
@@ -27,9 +27,9 @@ services:
     environment:
       - SERVICES=sqs,sns,s3
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - AWS_DEFAULT_REGION=us-east-1
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
     volumes:
       - localstack_data:/tmp/localstack
     healthcheck:

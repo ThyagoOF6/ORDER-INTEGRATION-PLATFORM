@@ -524,7 +524,7 @@ MIT - Veja LICENSE para detalhes
 
 ## Contato
 
-José Thyago - Desenvolvedor Java  
+Thyago Oliveira Ferreira - Desenvolvedor Java  
 Portfolio: Order Integration Platform  
 GitHub: [@ThyagoOF6](https://github.com/ThyagoOF6)
 

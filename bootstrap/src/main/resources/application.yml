@@ -12,9 +12,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/order_integration_db
-    username: order_user
-    password: order_password
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:order_integration_db}
+    username: ${DB_USER:order_user}
+    password: ${DB_PASSWORD:order_password}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
