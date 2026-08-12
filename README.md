@@ -198,16 +198,18 @@ Pedido (Estado Inicial)
 ## Checklist de Implementação
 
 ### ✅ Fase 0 - Scaffolding (Completa)
+
 - [x] Estrutura Hexagonal com 8 módulos Gradle
 - [x] Domain Layer: Aggregates (Pedido), Value Objects (PedidoId, ItemPedido)
 - [x] Domain Events base (DomainEvent, PedidoCriadoEvent)
 - [x] State Machine (CRIADO → VALIDADO → SINCRONIZANDO → SINCRONIZADO/ERRO)
-- [x] >95% JaCoCo code coverage
+- [x] > 95% JaCoCo code coverage
 - [x] GitHub Actions CI/CD pipeline
 - [x] Docker Compose (PostgreSQL 16 + LocalStack)
 - [x] 3 Architecture Decision Records (ADRs 001-003)
 
 ### ✅ Fase 1 - Application Layer + REST (Completa)
+
 - [x] PedidoService: 6 use cases (criar, buscar, validar, iniciar sync, confirmar sync, registrar erro)
 - [x] PedidoRepositoryPort: Hexagonal port interface
 - [x] PedidoJpaRepositoryAdapter: Spring Data JPA implementation
@@ -217,10 +219,11 @@ Pedido (Estado Inicial)
 - [x] Integration Tests: 8 test cases com MockMvc + H2
 - [x] Spring Validation (@NotBlank, @NotEmpty, @Valid)
 - [x] Exception Handling: PedidoNaoEncontradoException, GlobalExceptionHandler
-- [x] Flyway Migration: V1__create_pedido_tables.sql
+- [x] Flyway Migration: V1\_\_create_pedido_tables.sql
 - [x] OpenAPI/Swagger annotations
 
 ### ✅ Fase 2 - SAP Integration (Completa)
+
 - [x] SapSyncPort: Hexagonal port interface (sincronizarPedidoRfc, publicarPedidoIdoc)
 - [x] RfcConnector: Synchronous RFC adapter
   - [x] criarPedidoRfc() com @Retryable
@@ -255,12 +258,19 @@ Pedido (Estado Inicial)
   - [x] ADR-004: SAP Integration Pattern Decision
   - [x] FASE-2-SAP-INTEGRATION.md: Complete guide with examples
 
-### ⏳ Fase 2.5 - Response Queue (Planejada)
-- [ ] Response Listeners for iDoc confirmations
-- [ ] Auto-update order status on async completion
-- [ ] Error queue handling
+### ✅ Fase 2.5 - Response Queue Listeners (Completa)
+
+- [x] IdocResponse DTO para confirmações iDoc
+- [x] IdocResponsePort interface (porta hexagonal)
+- [x] IdocResponseService com transições de estado
+- [x] IdocResponseListener para fila de sucesso
+- [x] ErrorQueueListener para fila de erros
+- [x] 8 testes unitários (listeners + service)
+- [x] Auto-update de status SINCRONIZANDO → SINCRONIZADO/ERRO
+- [x] Documentação completa (FASE-2.5-RESPONSE-QUEUE.md)
 
 ### ⏳ Fase 3 - Event Sourcing & Messaging (Próxima)
+
 - [ ] Event Store implementation
 - [ ] Event Sourcing pattern
 - [ ] Message Broker (Kafka/RabbitMQ)
@@ -328,13 +338,19 @@ Git: ✅ 5 commits (master branch synchronized)
 
 ---
 
-### Fase 2.5 (Planejada - Refinamento)
+### Fase 2.5 (COMPLETA ✅ - Response Queue Listeners)
 
-- [ ] Response Listeners: Ouvidores de confirmação iDoc
-- [ ] Auto-update Status: Atualização automática de estado SINCRONIZANDO → SINCRONIZADO
-- [ ] Error Queues: Tratamento de falhas em fila separada
+✅ **IdocResponse DTO**: Estrutura para confirmações de iDoc (idocId, pedidoId, status, errorCode, errorMessage)  
+✅ **IdocResponsePort**: Interface hexagonal para processamento de respostas  
+✅ **IdocResponseService**: Orquestração de transições de estado (SINCRONIZANDO → SINCRONIZADO/ERRO)  
+✅ **IdocResponseListener**: Componente ouvinte para fila de sucesso (sap-idoc-response)  
+✅ **ErrorQueueListener**: Componente ouvinte para fila de erros (sap-idoc-error)  
+✅ **Transações Atômicas**: @Transactional para garantir consistência de estado  
+✅ **8 Unit Tests**: Validação de fluxos sucesso/erro, null-safety, exception handling  
+✅ **Documentação**: FASE-2.5-RESPONSE-QUEUE.md com exemplos Kafka/RabbitMQ/Azure Service Bus  
+✅ **Desacoplamento Temporal**: Respostas retornam 202 Accepted, atualizações assincronizadas
 
-**Saída**: Sincronização assíncrona totalmente automatizada
+**Saída**: Sincronização assíncrona totalmente automatizada com auditoria | Commit: `ea23c1f`
 
 ---
 
@@ -664,14 +680,14 @@ Todos os pushes passam por CI/CD automaticamente.
 | **0**   | 1 dia   | Scaffolding + Domain       | ✅ Completa  |
 | **1**   | 2 sem   | API REST + Persistência    | ✅ Completa  |
 | **2**   | 2 sem   | SAP Integration (RFC/iDoc) | ✅ Completa  |
-| **2.5** | 1 sem   | Response Queue             | ⏳ Planejada |
+| **2.5** | 1 sem   | Response Queue Listeners   | ✅ Completa  |
 | **3**   | 2 sem   | Event Sourcing + Msgs      | ⏳ Próxima   |
 | **4**   | 1 sem   | Performance + Caching      | ⏳ Planejada |
 | **5**   | 1 sem   | Monitoring + Observability | ⏳ Planejada |
 | **6**   | 1 sem   | Advanced DDD Patterns      | ⏳ Planejada |
 | **7**   | 1 sem   | Event Sourcing + Auditoria | ⏳ Planejada |
 
-**Progresso**: 3/9 fases completas (33%)  
+**Progresso**: 4/9 fases completas (44%)  
 **Total estimado**: 10 semanas para sistema totalmente em produção
 
 ## Referências
@@ -695,6 +711,6 @@ GitHub: [@ThyagoOF6](https://github.com/ThyagoOF6)
 ---
 
 **Última atualização**: Agosto 2026  
-**Versão**: 1.2.0 (Fase 2 - SAP Integration Completa)  
-**Status**: Pronto para Fase 3 (Event Sourcing)  
-**Build**: ✅ SUCCESS | **Testes**: 15+ unitários (>95% cobertura Fase 0) | **Commits**: 5
+**Versão**: 1.3.0 (Fase 2.5 - Response Queue Listeners Completa)  
+**Status**: Pronto para Fase 3 (Event Sourcing + Message Broker)  
+**Build**: ✅ SUCCESS | **Testes**: 23+ unitários (>95% cobertura Fases 0-2.5) | **Commits**: 7
