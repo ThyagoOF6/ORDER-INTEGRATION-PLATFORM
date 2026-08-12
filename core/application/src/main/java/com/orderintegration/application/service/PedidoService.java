@@ -21,15 +21,18 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class PedidoService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(PedidoService.class);
 
     private final PedidoRepositoryPort pedidoRepository;
     private final SapSyncPort sapSyncPort;
+    private final EventPublisherService eventPublisherService;
 
-    public PedidoService(PedidoRepositoryPort pedidoRepository, SapSyncPort sapSyncPort) {
+    public PedidoService(PedidoRepositoryPort pedidoRepository, SapSyncPort sapSyncPort,
+            EventPublisherService eventPublisherService) {
         this.pedidoRepository = pedidoRepository;
         this.sapSyncPort = sapSyncPort;
+        this.eventPublisherService = eventPublisherService;
     }
 
     /**
@@ -51,6 +54,9 @@ public class PedidoService {
 
         // Persistir
         Pedido pedidoSalvo = pedidoRepository.salvar(pedido);
+
+        // Persistir eventos de domínio no Event Store (Phase 3)
+        eventPublisherService.publicarEventos(pedido);
 
         // Converter para response
         return converterParaResponse(pedidoSalvo);
@@ -105,6 +111,7 @@ public class PedidoService {
 
         pedido.confirmarSincronizacao();
         Pedido pedidoAtualizado = pedidoRepository.atualizar(pedido);
+        eventPublisherService.publicarEventos(pedido);
 
         return converterParaResponse(pedidoAtualizado);
     }
@@ -119,10 +126,11 @@ public class PedidoService {
 
         pedido.registrarErro(mensagemErro);
         Pedido pedidoAtualizado = pedidoRepository.atualizar(pedido);
+        eventPublisherService.publicarEventos(pedido);
 
         return converterParaResponse(pedidoAtualizado);
     }
-    
+
     /**
      * Caso de uso: Sincronizar pedido com SAP via RFC (síncrono)
      * RFC garante consistência imediata
@@ -130,33 +138,35 @@ public class PedidoService {
     @Transactional
     public PedidoResponseDTO sincronizarComSapRfc(String pedidoId) {
         logger.info("Iniciando sincronização RFC com SAP para pedido: {}", pedidoId);
-        
+
         Pedido pedido = pedidoRepository.buscarPorId(PedidoId.de(pedidoId))
                 .orElseThrow(() -> new PedidoNaoEncontradoException(pedidoId));
-        
+
         try {
             // Chamada síncrona ao SAP via RFC
             String transacaoId = sapSyncPort.sincronizarPedidoRfc(pedido);
-            
+
             // Transição de estado: VALIDADO → SINCRONIZANDO → SINCRONIZADO
             pedido.iniciarSincronizacao();
             pedido.confirmarSincronizacao();
-            
+
             Pedido pedidoSincronizado = pedidoRepository.atualizar(pedido);
-            
+            eventPublisherService.publicarEventos(pedido);
+
             logger.info("Pedido sincronizado com RFC. Transação SAP: {}", transacaoId);
             return converterParaResponse(pedidoSincronizado);
-            
+
         } catch (SapSyncPort.SapSyncException e) {
             logger.error("Falha na sincronização RFC: {}", e.getMessage());
             pedido.iniciarSincronizacao();
             pedido.registrarErro("Erro RFC SAP: " + e.getMessage());
             pedidoRepository.atualizar(pedido);
-            
+            eventPublisherService.publicarEventos(pedido);
+
             throw new SyncComSapException("Falha ao sincronizar com SAP: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Caso de uso: Publicar pedido em iDoc para SAP (assíncrono)
      * iDoc permite integração desacoplada e tolerante a falhas
@@ -164,26 +174,28 @@ public class PedidoService {
     @Transactional
     public PedidoResponseDTO publicarPedidoIdoc(String pedidoId) {
         logger.info("Publicando iDoc para pedido: {}", pedidoId);
-        
+
         Pedido pedido = pedidoRepository.buscarPorId(PedidoId.de(pedidoId))
                 .orElseThrow(() -> new PedidoNaoEncontradoException(pedidoId));
-        
+
         try {
             // Publicação assíncrona via iDoc
             String idocId = sapSyncPort.publicarPedidoIdoc(pedido);
-            
+
             // Marca pedido como em sincronização (processamento assíncrono)
             pedido.iniciarSincronizacao();
             Pedido pedidoPublicado = pedidoRepository.atualizar(pedido);
-            
+            eventPublisherService.publicarEventos(pedido);
+
             logger.info("Pedido publicado como iDoc. ID: {}", idocId);
             return converterParaResponse(pedidoPublicado);
-            
+
         } catch (SapSyncPort.SapSyncException e) {
             logger.error("Falha na publicação iDoc: {}", e.getMessage());
             pedido.registrarErro("Erro ao publicar iDoc: " + e.getMessage());
             pedidoRepository.atualizar(pedido);
-            
+            eventPublisherService.publicarEventos(pedido);
+
             throw new SyncComSapException("Falha ao publicar iDoc: " + e.getMessage(), e);
         }
     }
@@ -216,7 +228,7 @@ public class PedidoService {
             super("Pedido com ID " + pedidoId + " não encontrado");
         }
     }
-    
+
     /**
      * Exceção de aplicação: Erro na sincronização com SAP
      */
@@ -224,7 +236,7 @@ public class PedidoService {
         public SyncComSapException(String message) {
             super(message);
         }
-        
+
         public SyncComSapException(String message, Throwable cause) {
             super(message, cause);
         }

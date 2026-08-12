@@ -269,12 +269,18 @@ Pedido (Estado Inicial)
 - [x] Auto-update de status SINCRONIZANDO → SINCRONIZADO/ERRO
 - [x] Documentação completa (FASE-2.5-RESPONSE-QUEUE.md)
 
-### ⏳ Fase 3 - Event Sourcing & Messaging (Próxima)
+### 🔄 Fase 3 - Event Sourcing & Message Broker (Fundação Completa)
 
-- [ ] Event Store implementation
-- [ ] Event Sourcing pattern
-- [ ] Message Broker (Kafka/RabbitMQ)
-- [ ] CQRS separation
+- [x] Event Store: tabela `domain_events` (Flyway V2) com 7 índices
+- [x] DomainEventRepositoryPort + DomainEventJpaRepositoryAdapter (mapeamento DTO/Entity)
+- [x] Pedido emite eventos em todas as transições (criação, sincronização, erro)
+- [x] EventPublisherService: persiste eventos pendentes no Event Store
+- [x] Kafka real: docker-compose com Zookeeper + Kafka + Kafka UI
+- [x] `@KafkaListener` ativado em IdocResponseListener e ErrorQueueListener
+- [x] 11 novos testes unitários (EventPublisherService + Adapter)
+- [x] Documentação completa (FASE-3-EVENT-SOURCING.md)
+- [ ] Relay Event Store → Kafka (scheduler de republicação) - Fase 3b
+- [ ] CQRS Read Models dedicados - Fase 3b
 
 ## Build & Test Status
 
@@ -354,15 +360,20 @@ Git: ✅ 5 commits (master branch synchronized)
 
 ---
 
-### Fase 3 (Próxima - Event Sourcing & Messaging)
+### Fase 3 (Fundação Completa 🔄 - Event Sourcing & Kafka)
 
-- [ ] Event Store: Persistência de domain events
-- [ ] Event Sourcing: Reconstrução de agregates via eventos
-- [ ] Message Broker: Kafka/RabbitMQ para comunicação
-- [ ] Subscribers: Listeners para domain events
-- [ ] CQRS: Separação Command/Query
+✅ **Event Store**: tabela `domain_events` com 7 índices, append-only, auditoria completa  
+✅ **Domain Event Publishing**: Pedido emite eventos em criação/sincronização/erro  
+✅ **EventPublisherService**: persiste eventos de domínio no Event Store  
+✅ **Kafka Real**: Zookeeper + Kafka + Kafka UI via docker-compose  
+✅ **Listeners Ativos**: `@KafkaListener` consumindo tópicos `sap-idoc-response`/`sap-idoc-error`  
+✅ **11 Testes Unitários**: EventPublisherService + DomainEventJpaRepositoryAdapter  
+✅ **Documentação**: FASE-3-EVENT-SOURCING.md com arquitetura e limitações conhecidas  
+⏳ **Pendente (Fase 3b)**: relay Event Store→Kafka, CQRS read models, query endpoints
 
-**Saída**: Auditoria completa e comunicação assíncrona
+**Saída**: Auditoria completa de eventos + integração Kafka real ativa
+
+---
 
 ### Fase 4 (Performance)
 
@@ -681,13 +692,13 @@ Todos os pushes passam por CI/CD automaticamente.
 | **1**   | 2 sem   | API REST + Persistência    | ✅ Completa  |
 | **2**   | 2 sem   | SAP Integration (RFC/iDoc) | ✅ Completa  |
 | **2.5** | 1 sem   | Response Queue Listeners   | ✅ Completa  |
-| **3**   | 2 sem   | Event Sourcing + Msgs      | ⏳ Próxima   |
+| **3**   | 2 sem   | Event Sourcing + Msgs      | 🔄 Fundação completa |
 | **4**   | 1 sem   | Performance + Caching      | ⏳ Planejada |
 | **5**   | 1 sem   | Monitoring + Observability | ⏳ Planejada |
 | **6**   | 1 sem   | Advanced DDD Patterns      | ⏳ Planejada |
 | **7**   | 1 sem   | Event Sourcing + Auditoria | ⏳ Planejada |
 
-**Progresso**: 4/9 fases completas (44%)  
+**Progresso**: 4.5/9 fases completas (50%)  
 **Total estimado**: 10 semanas para sistema totalmente em produção
 
 ## Referências
@@ -711,6 +722,6 @@ GitHub: [@ThyagoOF6](https://github.com/ThyagoOF6)
 ---
 
 **Última atualização**: Agosto 2026  
-**Versão**: 1.3.0 (Fase 2.5 - Response Queue Listeners Completa)  
-**Status**: Pronto para Fase 3 (Event Sourcing + Message Broker)  
-**Build**: ✅ SUCCESS | **Testes**: 23+ unitários (>95% cobertura Fases 0-2.5) | **Commits**: 7
+**Versão**: 1.4.0 (Fase 3 - Event Sourcing Fundação Completa)  
+**Status**: Pronto para Fase 3b (Relay Kafka + CQRS Read Models)  
+**Build**: ✅ SUCCESS | **Testes**: 34+ unitários (>95% cobertura Fases 0-3) | **Commits**: 8

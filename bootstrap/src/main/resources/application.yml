@@ -25,6 +25,25 @@ spring:
         jwt:
           issuer-uri: https://login.microsoftonline.com/common/v2.0
 
+  # Phase 3: Kafka Message Broker (Event Sourcing / Response Queue Listeners)
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      properties:
+        linger.ms: 10
+        batch.size: 32768
+    consumer:
+      group-id: order-integration-group
+      auto-offset-reset: earliest
+      max-poll-records: 500
+      properties:
+        session.timeout.ms: 30000
+    listener:
+      ack-mode: manual_immediate
+      concurrency: 3
+
 server:
   port: 8080
   servlet:
@@ -76,3 +95,10 @@ sap:
     message-type: ORDERS
     process-code: CRMORD
     port-dest: /APP/ORDER_INTEGRATION
+
+# Phase 3: Message Broker Topics (Event Sourcing / Response Queue Listeners)
+messaging:
+  topics:
+    idoc-response-success: sap-idoc-response
+    idoc-response-error: sap-idoc-error
+    domain-events: domain-events

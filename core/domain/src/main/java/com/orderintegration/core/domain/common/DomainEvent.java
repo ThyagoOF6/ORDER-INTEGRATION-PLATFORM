@@ -1,6 +1,7 @@
 package com.orderintegration.core.domain.common;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -31,6 +32,16 @@ public abstract class DomainEvent {
     public String getNomeEvento() {
         return nomeEvento;
     }
+
+    /**
+     * ID do agregado que originou o evento (ex.: pedidoId)
+     */
+    public abstract String getAggregateId();
+
+    /**
+     * Representação do evento como payload serializável para o Event Store
+     */
+    public abstract Map<String, Object> toPayload();
 
     @Override
     public boolean equals(Object o) {

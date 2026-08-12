@@ -28,11 +28,14 @@ class IdocResponseServiceTest {
     @Mock
     private PedidoRepositoryPort pedidoRepository;
 
+    @Mock
+    private EventPublisherService eventPublisherService;
+
     private IdocResponseService service;
 
     @BeforeEach
     void setUp() {
-        service = new IdocResponseService(pedidoRepository);
+        service = new IdocResponseService(pedidoRepository, eventPublisherService);
     }
 
     @Test

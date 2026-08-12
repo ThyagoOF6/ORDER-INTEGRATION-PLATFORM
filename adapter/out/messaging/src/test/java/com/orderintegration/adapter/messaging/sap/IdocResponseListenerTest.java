@@ -1,5 +1,6 @@
 package com.orderintegration.adapter.messaging.sap;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orderintegration.application.dto.IdocResponse;
 import com.orderintegration.application.port.IdocResponsePort;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,7 @@ class IdocResponseListenerTest {
 
     @BeforeEach
     void setUp() {
-        listener = new IdocResponseListener(idocResponsePort);
+        listener = new IdocResponseListener(idocResponsePort, new ObjectMapper());
     }
 
     @Test

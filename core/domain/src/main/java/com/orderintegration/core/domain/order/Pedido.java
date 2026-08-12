@@ -2,6 +2,8 @@ package com.orderintegration.core.domain.order;
 
 import com.orderintegration.core.domain.common.DomainEvent;
 import com.orderintegration.core.domain.order.events.PedidoCriadoEvent;
+import com.orderintegration.core.domain.order.events.PedidoErroSincronizacaoEvent;
+import com.orderintegration.core.domain.order.events.PedidoSincronizadoEvent;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -107,6 +109,7 @@ public class Pedido {
         }
         this.status = StatusPedido.SINCRONIZADO;
         this.mensagemErro = null;
+        this.eventos.add(new PedidoSincronizadoEvent(pedidoId.getValor(), null, status.name()));
     }
 
     /**
@@ -120,6 +123,7 @@ public class Pedido {
         }
         this.status = StatusPedido.ERRO;
         this.mensagemErro = Objects.requireNonNull(mensagem, "Mensagem de erro não pode ser nula");
+        this.eventos.add(new PedidoErroSincronizacaoEvent(pedidoId.getValor(), "SYNC_ERROR", mensagem, "1"));
     }
 
     /**

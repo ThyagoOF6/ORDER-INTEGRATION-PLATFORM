@@ -5,46 +5,47 @@
 **Context**: Enterprise integration with SAP backend for order processing and synchronization
 
 ## Problem Statement
+
 Order Integration Platform needs to communicate with SAP ERP for order creation and status management. This requires deciding between synchronous (RFC) and asynchronous (iDoc) integration patterns.
 
 ## Decision
+
 Implement **hybrid integration approach**:
+
 1. **RFC (Remote Function Call)**: Synchronous integration for order creation and status updates
 2. **iDoc (Intermediate Document)**: Asynchronous integration for notification and audit trail
 
 ## Rationale
 
 ### RFC (Synchronous)
+
 - **Advantages**:
   - Immediate consistency - order created/updated in SAP confirmed before returning response
   - Simple error handling - RFC call fails immediately, easy to propagate error
   - Real-time status visibility
   - No message queue dependency
-  
 - **Disadvantages**:
   - Blocks client request until SAP responds
   - Network latency impact on API response time
   - SAP system downtime blocks orders
-  
 - **Use Cases**:
   - Initial order creation (clients expect immediate confirmation)
   - Urgent status updates
   - Integration testing and development
 
 ### iDoc (Asynchronous)
+
 - **Advantages**:
   - Non-blocking - order published to queue immediately
   - Fault tolerance - queue survives SAP downtime
   - Scalable - orders queued for batch processing
   - Audit trail - every order tracked through messaging middleware
   - Decoupled systems - platform independent of SAP processing speed
-  
 - **Disadvantages**:
   - Eventual consistency - delay before SAP processes
   - Requires message broker infrastructure (Kafka, RabbitMQ)
   - Complex debugging (errors hidden in async processing)
   - Order status updates must poll or listen to response queue
-  
 - **Use Cases**:
   - Bulk order processing
   - Non-urgent updates
@@ -64,23 +65,27 @@ Order Intake (REST API)
 ### Implementation Details
 
 **SapSyncPort** (core/application/port)
+
 - Port interface defining contract
 - Methods: `sincronizarPedidoRfc()`, `publicarPedidoIdoc()`
 - Both return transaction IDs for tracking
 
 **RfcConnector** (adapter/out/messaging/sap)
+
 - Encapsulates RFC connection logic
 - Retry policy: 3 attempts with exponential backoff
 - Timeout: 30 seconds per call
 - Mock implementation for development (SAP JCo in production)
 
 **IdocPublisher** (adapter/out/messaging/sap)
+
 - Generates iDoc XML in standard SAP ORDERS format
 - Publishes to message queue
 - UUID generation for tracking
 - Fields included: cliente, pedido, items, valores, status
 
 **SapOrderAdapter** (adapter/out/messaging/sap)
+
 - Implements SapSyncPort
 - Coordinates RFC and iDoc calls
 - Error translation from SAP to application exceptions
@@ -104,11 +109,13 @@ sap:
 ## Integration Points
 
 **PedidoService** (core/application/service)
+
 - New methods: `syncronizarComSapRfc()`, `publicarPedidoIdoc()`
 - Called explicitly by REST endpoints
 - Error handling converts SAP exceptions to application exceptions
 
 **REST Endpoints** (adapter/in/rest)
+
 - `POST /pedidos/{id}/sincronizar-rfc`: Trigger synchronous RFC call
 - `POST /pedidos/{id}/publicar-idoc`: Trigger asynchronous iDoc publishing
 - HTTP 503 Service Unavailable for SAP connectivity issues
@@ -116,12 +123,14 @@ sap:
 ## Consequences
 
 ### Positive
+
 - Flexible integration - choose sync/async per order
 - Testable - mock implementations easily
 - Scalable - iDoc approach enables bulk processing
 - Observable - transaction IDs for tracking
 
 ### Negative
+
 - Dual systems add complexity
 - Requires SAP RFC function modules (ZORDERS_CREATE, ZORDERS_UPDATE)
 - Development requires SAP landscape or mock service

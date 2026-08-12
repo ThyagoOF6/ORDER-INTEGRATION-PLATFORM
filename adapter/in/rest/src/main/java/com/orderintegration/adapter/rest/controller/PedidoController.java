@@ -111,7 +111,7 @@ public class PedidoController {
         PedidoResponseDTO response = pedidoService.registrarErroSincronizacao(pedidoId, mensagem);
         return ResponseEntity.ok(response);
     }
-    
+
     @PostMapping("/{pedidoId}/sincronizar-rfc")
     @Operation(summary = "Sincronizar com SAP via RFC", description = "Sincroniza o pedido com SAP usando chamada RFC síncrona")
     @ApiResponses({
@@ -126,7 +126,7 @@ public class PedidoController {
         PedidoResponseDTO response = pedidoService.sincronizarComSapRfc(pedidoId);
         return ResponseEntity.ok(response);
     }
-    
+
     @PostMapping("/{pedidoId}/publicar-idoc")
     @Operation(summary = "Publicar pedido como iDoc", description = "Publica o pedido como iDoc para processamento assíncrono em SAP")
     @ApiResponses({
@@ -157,7 +157,7 @@ public class PedidoController {
                 ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
-    
+
     @ExceptionHandler(PedidoService.SyncComSapException.class)
     public ResponseEntity<ErrorResponse> handleSyncComSapException(PedidoService.SyncComSapException ex) {
         ErrorResponse error = new ErrorResponse(

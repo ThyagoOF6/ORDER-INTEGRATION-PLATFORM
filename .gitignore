@@ -27,7 +27,7 @@ gradle.properties
 .env
 .env.local
 target/
-out/
+/out/
 
 # Docker
 .dockerignore

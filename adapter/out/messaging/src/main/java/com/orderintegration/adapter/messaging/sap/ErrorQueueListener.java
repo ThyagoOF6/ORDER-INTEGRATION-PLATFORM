@@ -1,9 +1,11 @@
 package com.orderintegration.adapter.messaging.sap;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orderintegration.application.dto.IdocResponse;
 import com.orderintegration.application.port.IdocResponsePort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,36 +18,36 @@ import org.springframework.stereotype.Component;
  * 4. Este listener consome a mensagem de erro
  * 5. Atualiza Pedido: SINCRONIZANDO → ERRO com mensagem
  * 
- * Implementations:
- * - Kafka topic: sap-idoc-error
- * - RabbitMQ queue: sap.idoc.error
- * - Azure Service Bus queue: sap-idoc-error
+ * Implementação: Kafka topic "sap-idoc-error" (Phase 3)
  */
 @Component
 public class ErrorQueueListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ErrorQueueListener.class);
     private final IdocResponsePort idocResponsePort;
+    private final ObjectMapper objectMapper;
 
-    public ErrorQueueListener(IdocResponsePort idocResponsePort) {
+    public ErrorQueueListener(IdocResponsePort idocResponsePort, ObjectMapper objectMapper) {
         this.idocResponsePort = idocResponsePort;
+        this.objectMapper = objectMapper;
+    }
+
+    /**
+     * Consome mensagens JSON do tópico Kafka de erros de iDoc e delega o
+     * processamento para processarErro(IdocResponse)
+     */
+    @KafkaListener(topics = "${messaging.topics.idoc-response-error:sap-idoc-error}", groupId = "${spring.kafka.consumer.group-id:order-integration-group}")
+    public void onMessage(String mensagemJson) {
+        try {
+            IdocResponse errorResponse = objectMapper.readValue(mensagemJson, IdocResponse.class);
+            processarErro(errorResponse);
+        } catch (Exception e) {
+            logger.error("Falha ao desserializar mensagem de erro iDoc: {}", mensagemJson, e);
+        }
     }
 
     /**
      * Processa mensagem de erro de iDoc da fila
-     * 
-     * Semelhante a IdocResponseListener, não implementar binding aqui.
-     * Implementações concretas:
-     * 
-     * Exemplo via Kafka:
-     * 
-     * @KafkaListener(topics = "sap-idoc-error", groupId =
-     *                       "order-integration-errors")
-     *                       public void onIdocError(String message) {
-     *                       IdocResponse errorResponse =
-     *                       objectMapper.readValue(message, IdocResponse.class);
-     *                       this.processarErro(errorResponse);
-     *                       }
      */
     public void processarErro(IdocResponse errorResponse) {
         logger.warn("Recebendo erro de iDoc: {}", errorResponse);

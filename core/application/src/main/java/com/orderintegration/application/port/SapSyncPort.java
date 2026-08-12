@@ -8,24 +8,26 @@ import com.orderintegration.core.domain.order.Pedido;
  * Implementação: adapter/out/messaging/SapOrderAdapter.java
  */
 public interface SapSyncPort {
-    
+
     /**
      * Sincroniza um pedido com o sistema SAP via RFC
+     * 
      * @param pedido o pedido a sincronizar
      * @return ID da transação SAP
      * @throws SapSyncException se a sincronização falhar
      */
     String sincronizarPedidoRfc(Pedido pedido);
-    
+
     /**
      * Publica um iDoc para o sistema SAP
      * Integração assíncrona via middleware de mensagens
+     * 
      * @param pedido o pedido a publicar como iDoc
      * @return ID do iDoc gerado
      * @throws SapSyncException se a publicação falhar
      */
     String publicarPedidoIdoc(Pedido pedido);
-    
+
     /**
      * Exceção de sincronização com SAP
      */
@@ -33,7 +35,7 @@ public interface SapSyncPort {
         public SapSyncException(String message) {
             super(message);
         }
-        
+
         public SapSyncException(String message, Throwable cause) {
             super(message, cause);
         }

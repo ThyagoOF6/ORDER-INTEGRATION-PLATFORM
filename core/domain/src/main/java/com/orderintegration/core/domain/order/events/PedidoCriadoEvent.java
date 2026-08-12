@@ -3,6 +3,8 @@ package com.orderintegration.core.domain.order.events;
 import com.orderintegration.core.domain.common.DomainEvent;
 import com.orderintegration.core.domain.order.PedidoId;
 
+import java.util.Map;
+
 /**
  * Domain Event: PedidoCriadoEvent
  * Publicado quando um novo Pedido é criado
@@ -26,5 +28,17 @@ public class PedidoCriadoEvent extends DomainEvent {
 
     public String getCodigoCliente() {
         return codigoCliente;
+    }
+
+    @Override
+    public String getAggregateId() {
+        return pedidoId;
+    }
+
+    @Override
+    public Map<String, Object> toPayload() {
+        return Map.of(
+                "pedidoId", pedidoId,
+                "codigoCliente", codigoCliente);
     }
 }

@@ -1,5 +1,6 @@
 package com.orderintegration.adapter.messaging.sap;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orderintegration.application.dto.IdocResponse;
 import com.orderintegration.application.port.IdocResponsePort;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,7 @@ class ErrorQueueListenerTest {
 
     @BeforeEach
     void setUp() {
-        listener = new ErrorQueueListener(idocResponsePort);
+        listener = new ErrorQueueListener(idocResponsePort, new ObjectMapper());
     }
 
     @Test

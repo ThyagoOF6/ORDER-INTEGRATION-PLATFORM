@@ -234,11 +234,13 @@ POST /pedidos/{id}/publicar-idoc - iDoc publish (mocked)
 ### Manual Testing
 
 Development/mocked SAP responses:
+
 - RFC calls return `SAP-{timestamp}` transaction IDs
 - iDoc publishing returns UUID identifiers
 - No actual SAP connection required
 
 Production deployment:
+
 - Add SAP JCo library to classpath
 - Configure real SAP credentials in .env
 - Test against SAP sandbox/QA environment first

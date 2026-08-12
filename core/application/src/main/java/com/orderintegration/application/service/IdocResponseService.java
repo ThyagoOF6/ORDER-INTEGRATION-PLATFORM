@@ -26,9 +26,11 @@ public class IdocResponseService implements IdocResponsePort {
 
     private static final Logger logger = LoggerFactory.getLogger(IdocResponseService.class);
     private final PedidoRepositoryPort pedidoRepository;
+    private final EventPublisherService eventPublisherService;
 
-    public IdocResponseService(PedidoRepositoryPort pedidoRepository) {
+    public IdocResponseService(PedidoRepositoryPort pedidoRepository, EventPublisherService eventPublisherService) {
         this.pedidoRepository = pedidoRepository;
+        this.eventPublisherService = eventPublisherService;
     }
 
     /**
@@ -60,6 +62,7 @@ public class IdocResponseService implements IdocResponsePort {
 
             // Persistir
             pedidoRepository.atualizar(pedido);
+            eventPublisherService.publicarEventos(pedido);
 
             logger.info("iDoc processado com sucesso para pedidoId={}, novo status={}",
                     pedidoId.getValor(), pedido.getStatus());
@@ -109,6 +112,7 @@ public class IdocResponseService implements IdocResponsePort {
 
             // Persistir
             pedidoRepository.atualizar(pedido);
+            eventPublisherService.publicarEventos(pedido);
 
             logger.info("iDoc error registrado para pedidoId={}, novo status={}",
                     pedidoId.getValor(), pedido.getStatus());
