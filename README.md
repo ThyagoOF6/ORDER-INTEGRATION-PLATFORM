@@ -8,17 +8,17 @@ O projeto demonstra padrões empresariais em Java usando Domain-Driven Design (D
 
 ### Tecnologias
 
-| Camada | Tecnologia | Versão |
-|--------|-----------|--------|
-| **Linguagem** | Java | 21 LTS |
-| **Framework** | Spring Boot | 3.3.2 |
-| **Build** | Gradle | 8.5 |
-| **Banco de Dados** | PostgreSQL | 16 |
-| **Orquestração** | Docker Compose | v2+ |
-| **CI/CD** | GitHub Actions | Latest |
+| Camada              | Tecnologia                 | Versão |
+| ------------------- | -------------------------- | ------ |
+| **Linguagem**       | Java                       | 21 LTS |
+| **Framework**       | Spring Boot                | 3.3.2  |
+| **Build**           | Gradle                     | 8.5    |
+| **Banco de Dados**  | PostgreSQL                 | 16     |
+| **Orquestração**    | Docker Compose             | v2+    |
+| **CI/CD**           | GitHub Actions             | Latest |
 | **Observabilidade** | OpenTelemetry + Prometheus | Latest |
-| **Testes** | JUnit 5 + Mockito | 5.10+ |
-| **Cobertura** | JaCoCo | 0.8.11 |
+| **Testes**          | JUnit 5 + Mockito          | 5.10+  |
+| **Cobertura**       | JaCoCo                     | 0.8.11 |
 
 ## Arquitetura
 
@@ -176,7 +176,7 @@ Pedido (Estado Inicial)
 ✅ Docker: PostgreSQL 16 + LocalStack  
 ✅ GitHub Actions: build → test → qualidade → docker → segurança  
 ✅ 3 Architecture Decision Records (ADRs)  
-✅ Documentação técnica completa  
+✅ Documentação técnica completa
 
 **Status**: ✅ PRONTO PARA FASE 1
 
@@ -257,16 +257,18 @@ Pedido (Estado Inicial)
 ### Setup Local
 
 1. **Clone o repositório**
+
    ```bash
    git clone https://github.com/ThyagoOF6/ORDER-INTEGRATION-PLATFORM.git
    cd order-integration-platform
    ```
 
 2. **Inicie o banco de dados**
+
    ```bash
    docker-compose up -d
    ```
-   
+
    PostgreSQL estará disponível em:
    - Host: `localhost:5432`
    - User: `orderintegration`
@@ -274,20 +276,23 @@ Pedido (Estado Inicial)
    - Database: `order_integration_platform`
 
 3. **Compile o projeto**
+
    ```bash
    ./gradlew build
    ```
 
 4. **Execute os testes**
+
    ```bash
    ./gradlew test
    ```
 
 5. **Inicie a aplicação** (Fase 1+)
+
    ```bash
    ./gradlew bootRun -p bootstrap
    ```
-   
+
    A aplicação estará disponível em `http://localhost:8080/api`
 
 ### Comandos Úteis
@@ -350,10 +355,10 @@ void deveCriarPedidoComStatusCriado() {
     List<ItemPedido> itens = List.of(
         ItemPedido.criar("PROD-001", "Notebook", 2, BigDecimal.valueOf(5000))
     );
-    
+
     // When
     Pedido pedido = Pedido.criar(codigoCliente, itens);
-    
+
     // Then
     assertEquals(StatusPedido.CRIADO, pedido.getStatus());
     assertEquals(1, pedido.getItens().size());
@@ -374,12 +379,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-  
+
   datasource:
     url: jdbc:postgresql://localhost:5432/order_integration_platform
     username: orderintegration
     password: dev_password_123
-  
+
   security:
     oauth2:
       resourceserver:
@@ -425,11 +430,11 @@ Ver [docs/adr/](docs/adr/) para Architecture Decision Records completos:
 
 ### Métricas Esperadas
 
-| Operação | Target | Status |
-|----------|--------|--------|
-| Criar Pedido | <100ms | ✅ |
-| Buscar Pedido | <50ms | ✅ |
-| Sincronizar SAP | <5s | ⏳ Fase 3 |
+| Operação                   | Target | Status    |
+| -------------------------- | ------ | --------- |
+| Criar Pedido               | <100ms | ✅        |
+| Buscar Pedido              | <50ms  | ✅        |
+| Sincronizar SAP            | <5s    | ⏳ Fase 3 |
 | Listar Pedidos (100 itens) | <200ms | ⏳ Fase 1 |
 
 ### Otimizações Roadmap
@@ -447,7 +452,7 @@ Ver [docs/adr/](docs/adr/) para Architecture Decision Records completos:
 ✅ Java 21 com security patches até 2029  
 ✅ Dependências gerenciadas (SonarQube quality gate)  
 ✅ Docker com usuário não-root  
-✅ Variáveis de ambiente para secrets  
+✅ Variáveis de ambiente para secrets
 
 ### Roadmap
 
@@ -461,7 +466,7 @@ Ver [docs/adr/](docs/adr/) para Architecture Decision Records completos:
 GitHub Actions pipeline automatizado:
 
 ```
-Push → Checkout → Setup Java → Build → Test → Coverage → 
+Push → Checkout → Setup Java → Build → Test → Coverage →
 SonarQube → Docker Build → Trivy Scan → Push Registry
 ```
 
@@ -482,6 +487,7 @@ chore: tarefas diversas
 ```
 
 Exemplo:
+
 ```
 git commit -m "feat: implementa PedidoService com casos de uso"
 ```
@@ -497,16 +503,16 @@ Todos os pushes passam por CI/CD automaticamente.
 
 ## Roadmap Completo
 
-| Fase | Duração | Foco | Status |
-|------|---------|------|--------|
-| **0** | 1 dia | Scaffolding + Domain | ✅ |
-| **1** | 2 sem | API REST + Persistência | ⏳ |
-| **2** | 2 sem | Azure Integration | ⏳ |
-| **3** | 2 sem | SAP Integration | ⏳ |
-| **4** | 1 sem | Performance | ⏳ |
-| **5** | 1 sem | Monitoring | ⏳ |
-| **6** | 1 sem | Advanced DDD | ⏳ |
-| **7** | 1 sem | Event Sourcing | ⏳ |
+| Fase  | Duração | Foco                    | Status |
+| ----- | ------- | ----------------------- | ------ |
+| **0** | 1 dia   | Scaffolding + Domain    | ✅     |
+| **1** | 2 sem   | API REST + Persistência | ⏳     |
+| **2** | 2 sem   | Azure Integration       | ⏳     |
+| **3** | 2 sem   | SAP Integration         | ⏳     |
+| **4** | 1 sem   | Performance             | ⏳     |
+| **5** | 1 sem   | Monitoring              | ⏳     |
+| **6** | 1 sem   | Advanced DDD            | ⏳     |
+| **7** | 1 sem   | Event Sourcing          | ⏳     |
 
 **Total**: 8 semanas para sistema completo em produção
 

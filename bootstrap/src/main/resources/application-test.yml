@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: order-integration-platform-test
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.H2Dialect
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      maximum-pool-size: 2
+
+  h2:
+    console:
+      enabled: true
+
+  flyway:
+    enabled: false
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    root: WARN
+    com.orderintegration: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
