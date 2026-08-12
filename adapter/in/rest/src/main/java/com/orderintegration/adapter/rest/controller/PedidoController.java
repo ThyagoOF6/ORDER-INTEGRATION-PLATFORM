@@ -111,6 +111,36 @@ public class PedidoController {
         PedidoResponseDTO response = pedidoService.registrarErroSincronizacao(pedidoId, mensagem);
         return ResponseEntity.ok(response);
     }
+    
+    @PostMapping("/{pedidoId}/sincronizar-rfc")
+    @Operation(summary = "Sincronizar com SAP via RFC", description = "Sincroniza o pedido com SAP usando chamada RFC síncrona")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pedido sincronizado com RFC"),
+            @ApiResponse(responseCode = "404", description = "Pedido não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Pedido em estado inválido"),
+            @ApiResponse(responseCode = "503", description = "Serviço SAP indisponível"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<PedidoResponseDTO> sincronizarComSapRfc(
+            @PathVariable String pedidoId) {
+        PedidoResponseDTO response = pedidoService.sincronizarComSapRfc(pedidoId);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/{pedidoId}/publicar-idoc")
+    @Operation(summary = "Publicar pedido como iDoc", description = "Publica o pedido como iDoc para processamento assíncrono em SAP")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pedido publicado como iDoc"),
+            @ApiResponse(responseCode = "404", description = "Pedido não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Pedido em estado inválido"),
+            @ApiResponse(responseCode = "503", description = "Fila de mensagens indisponível"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<PedidoResponseDTO> publicarPedidoIdoc(
+            @PathVariable String pedidoId) {
+        PedidoResponseDTO response = pedidoService.publicarPedidoIdoc(pedidoId);
+        return ResponseEntity.ok(response);
+    }
 
     @ExceptionHandler(PedidoService.PedidoNaoEncontradoException.class)
     public ResponseEntity<ErrorResponse> handlePedidoNotFound(PedidoService.PedidoNaoEncontradoException ex) {
@@ -126,6 +156,14 @@ public class PedidoController {
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+    
+    @ExceptionHandler(PedidoService.SyncComSapException.class)
+    public ResponseEntity<ErrorResponse> handleSyncComSapException(PedidoService.SyncComSapException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                "Erro na sincronização com SAP: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
     }
 
     /**

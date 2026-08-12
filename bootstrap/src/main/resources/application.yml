@@ -57,3 +57,22 @@ management:
     export:
       prometheus:
         enabled: true
+
+# SAP Configuration
+sap:
+  rfc:
+    host: ${SAP_HOST:localhost}
+    port: ${SAP_PORT:3200}
+    client: ${SAP_CLIENT:100}
+    user: ${SAP_USER:DEVELOPER}
+    password: ${SAP_PASSWORD:}
+    language: EN
+    function-module-create-order: ZORDERS_CREATE
+    function-module-update-order: ZORDERS_UPDATE
+    max-retries: 3
+    retry-delay-ms: 5000
+    connection-timeout-ms: 30000
+  idoc:
+    message-type: ORDERS
+    process-code: CRMORD
+    port-dest: /APP/ORDER_INTEGRATION
